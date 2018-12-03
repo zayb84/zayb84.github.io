@@ -63,31 +63,69 @@
   </div>
   <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.8.0/jszip.js"></script>
   <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.8.0/xlsx.js"></script>
+  <script src=" https://cdnjs.cloudflare.com/ajax/libs/xls/0.7.4-a/xls.js"></script>
   <script>
     // var ExcelToJSON = function () {
 
     this.parseExcel = function (file) {
-      // console.log(file);
+      console.log(file);
       if (!file) return;
       var oFile = file.target.files[0];
       var sFilename = oFile.name;
+      var type = 'xlsx';
+      if (oFile.name.split('.xlsx').length > 1) {
+        type = 'xlsx';
+      } else if (oFile.name.split('.xls').length > 1) {
+        type = 'xls';
+      }
+      console.log(type);
 
       var reader = new FileReader();
       let result = [];
       var fileObject = {};
       var header = [];
       reader.onload = function (e) {
-        var data = e.target.result;
-        data = new Uint8Array(data);
-        var workbook = XLSX.read(data, { type: 'array' });
-        workbook.SheetNames.forEach(function (sheetName, index) {
-          if (index === 0) {
-            var roa = XLSX.utils.sheet_to_json(workbook.Sheets[sheetName], { header: 1 });
-            // console.log(roa);
-            header = roa[0];
-            if (roa.length) result = roa;
-          }
-        });
+        console.log(e);
+        if (type === 'xlsx') {
+          var data = e.target.result;
+          data = new Uint8Array(data);
+          var workbook = XLSX.read(data, { type: 'array' });
+          workbook.SheetNames.forEach(function (sheetName, index) {
+            if (index === 0) {
+              var roa = XLSX.utils.sheet_to_json(workbook.Sheets[sheetName], { header: 1 });
+              // console.log(roa);
+              header = roa[0];
+              if (roa.length) result = roa;
+            }
+          });
+        } else if (type === 'xls') {
+          var data = e.target.result;
+          var cfb = XLSX.read(data, { type: 'binary' });
+          console.log(cfb)
+          cfb.SheetNames.forEach(function (sheetName, index) {
+            if (index === 0) {
+              // var roa = XLS.utils.sheet_to_json(workbook.Sheets[sheetName], { header: 1 });
+              var oJS = XLS.utils.sheet_to_json(cfb.Sheets[sheetName]);
+              console.log(oJS)
+              // console.log(roa);
+              for (let i in oJS[0]) {
+                header.push(i);
+              }
+              console.log(header);
+              for (let i = 1; i < oJS.length; i++) {
+                var array = [];
+                for(let key in oJS[i]) {
+                  array.push(oJS[i][key]);
+                  // console.log(array);
+                }
+                result.push(array);
+              }
+              // console.log(result);
+              return;
+              // if (roa.length) result = roa;
+            }
+          });
+        }
         // see the result, caution: it works after reader event is done.
         // console.log(result);
         // console.log(result);
@@ -147,7 +185,7 @@
             let row = rowArray.join(",");
             csvContent += row + "\r\n";
           });
-          console.log(csvContent);
+          // console.log(csvContent);
           var encodedUri = encodeURI(csvContent);
           var link = document.createElement("a");
           link.setAttribute("href", encodedUri);
@@ -156,7 +194,12 @@
           link.click();
         }
       };
-      reader.readAsArrayBuffer(oFile);
+      if (type === 'xls') {
+        reader.readAsBinaryString(oFile);
+      } else {
+        reader.readAsArrayBuffer(oFile);
+
+      }
     };
     // };
   </script>
