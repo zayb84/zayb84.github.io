@@ -15,7 +15,7 @@
     // var ExcelToJSON = function () {
 
     this.parseExcel = function (file) {
-      console.log(file);
+      // console.log(file);
       if (!file) return;
       var oFile = file.target.files[0];
       var sFilename = oFile.name;
@@ -23,6 +23,7 @@
       var reader = new FileReader();
       let result = [];
       var fileObject = {};
+      var header = [];
       reader.onload = function (e) {
         var data = e.target.result;
         data = new Uint8Array(data);
@@ -31,19 +32,20 @@
           if (index === 0) {
             var roa = XLSX.utils.sheet_to_json(workbook.Sheets[sheetName], { header: 1 });
             // console.log(roa);
+            header = roa[0];
             if (roa.length) result = roa;
           }
         });
         // see the result, caution: it works after reader event is done.
         // console.log(result);
-        console.log(result);
+        // console.log(result);
         // var do1 = result[0];
         // for (var i = 0; i < 1000; i++) {
         //   result.push(do1);
         // }
         console.log(result.length);
         if (result.length > 450) {
-          console.log('GREATER THAN 450');
+          // console.log('GREATER THAN 450');
           let count = 1;
           let breakValue;
           let sliceCount = 0;
@@ -53,6 +55,7 @@
             if (result[i]) {
               // console.log(sliceCount, i);
               fileObject[oFile.name + '__' + count] = result.slice(sliceCount, i);
+              fileObject[oFile.name + '__' + count].unshift(header);
               count++;
               sliceCount = i;
             } else {
@@ -65,12 +68,13 @@
           }
           // console.log(fileObject, breakValue, count);
           let lastBreakValue = breakValue - 450;
-          console.log(lastBreakValue);
+          // console.log(lastBreakValue);
           if (result.length > lastBreakValue) {
             fileObject[oFile.name + '__' + count] = result.slice(lastBreakValue, result.length);
+            fileObject[oFile.name + '__' + count].unshift(header);
           }
           for (let i in fileObject) {
-            console.log('SS', fileObject[i].length);
+            // console.log('SS', fileObject[i].length);
             let csvContent = "data:text/csv;charset=utf-8,";
             fileObject[i].forEach(function (rowArray) {
               let row = rowArray.join(",");
@@ -86,6 +90,18 @@
           // console.log(fileObject, breakValue, count);
         } else {
           console.log('LESS Than');
+          let csvContent = "data:text/csv;charset=utf-8,";
+          result.forEach(function (rowArray) {
+            let row = rowArray.join(",");
+            csvContent += row + "\r\n";
+          });
+          console.log(csvContent);
+          var encodedUri = encodeURI(csvContent);
+          var link = document.createElement("a");
+          link.setAttribute("href", encodedUri);
+          link.setAttribute("download", oFile.name + '__1');
+          document.body.appendChild(link);
+          link.click();
         }
       };
       reader.readAsArrayBuffer(oFile);
