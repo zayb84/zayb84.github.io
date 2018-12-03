@@ -5,10 +5,62 @@
   <meta charset="utf-8">
   <title>Excel Parser</title>
   <base href="/">
+  <style>
+    body {
+      overflow: hidden;
+    }
+
+    .header {
+      padding: 10px;
+      display: flex;
+      /* align-items: center; */
+      justify-content: center;
+      flex-direction: column;
+      box-shadow: 1px 1px 1px 1px #c3c3c3;
+      background: white;
+    }
+
+    .content-center {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      height: 80vh;
+      flex-direction: column;
+      background: #eee;
+      margin-top: 8px;
+      box-shadow: 1px 1px 1px 1px #c3c3c3;
+    }
+
+    h1,
+    h2,
+    h3 {
+      margin-top: 5px;
+      margin-bottom: 0;
+      font-family: sans-serif;
+    }
+
+    h3 {
+      font-weight: 100;
+    }
+
+    input[type=file] {
+      width: 78px;
+      color: transparent;
+      margin-top: 15px;
+    }
+  </style>
 </head>
 
 <body>
-  <input onchange="parseExcel(event)" type="file" id="my_file_input" />
+  <div class="header">
+    <h1> Excel File Breaker</h1>
+    <h3> Break your file in chucks having 450 rows each.</h3>
+  </div>
+  <div class="content-center">
+    <img src="img/cloud-computing.png" width="70px" />
+    <h2> Upload your file </h2>
+    <input onchange="parseExcel(event)" type="file" id="my_file_input" />
+  </div>
   <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.8.0/jszip.js"></script>
   <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.8.0/xlsx.js"></script>
   <script>
