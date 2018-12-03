@@ -1,0 +1,97 @@
+<!doctype html>
+<html lang="en">
+
+<head>
+  <meta charset="utf-8">
+  <title>Excel Parser</title>
+  <base href="/">
+</head>
+
+<body>
+  <input onchange="parseExcel(event)" type="file" id="my_file_input" />
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.8.0/jszip.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.8.0/xlsx.js"></script>
+  <script>
+    // var ExcelToJSON = function () {
+
+    this.parseExcel = function (file) {
+      console.log(file);
+      if (!file) return;
+      var oFile = file.target.files[0];
+      var sFilename = oFile.name;
+
+      var reader = new FileReader();
+      let result = [];
+      var fileObject = {};
+      reader.onload = function (e) {
+        var data = e.target.result;
+        data = new Uint8Array(data);
+        var workbook = XLSX.read(data, { type: 'array' });
+        workbook.SheetNames.forEach(function (sheetName, index) {
+          if (index === 0) {
+            var roa = XLSX.utils.sheet_to_json(workbook.Sheets[sheetName], { header: 1 });
+            // console.log(roa);
+            if (roa.length) result = roa;
+          }
+        });
+        // see the result, caution: it works after reader event is done.
+        // console.log(result);
+        console.log(result);
+        // var do1 = result[0];
+        // for (var i = 0; i < 1000; i++) {
+        //   result.push(do1);
+        // }
+        console.log(result.length);
+        if (result.length > 450) {
+          console.log('GREATER THAN 450');
+          let count = 1;
+          let breakValue;
+          let sliceCount = 0;
+          let i = 450;
+          while (i <= 450 * count) {
+            // console.log(result[i]);
+            if (result[i]) {
+              // console.log(sliceCount, i);
+              fileObject[oFile.name + '__' + count] = result.slice(sliceCount, i);
+              count++;
+              sliceCount = i;
+            } else {
+              breakValue = i;
+              break;
+            }
+            // console.log(i);
+            i = i + 450;
+            // console.log(i);
+          }
+          // console.log(fileObject, breakValue, count);
+          let lastBreakValue = breakValue - 450;
+          console.log(lastBreakValue);
+          if (result.length > lastBreakValue) {
+            fileObject[oFile.name + '__' + count] = result.slice(lastBreakValue, result.length);
+          }
+          for (let i in fileObject) {
+            console.log('SS', fileObject[i].length);
+            let csvContent = "data:text/csv;charset=utf-8,";
+            fileObject[i].forEach(function (rowArray) {
+              let row = rowArray.join(",");
+              csvContent += row + "\r\n";
+            });
+            var encodedUri = encodeURI(csvContent);
+            var link = document.createElement("a");
+            link.setAttribute("href", encodedUri);
+            link.setAttribute("download", i);
+            document.body.appendChild(link);
+            link.click();
+          }
+          // console.log(fileObject, breakValue, count);
+        } else {
+          console.log('LESS Than');
+        }
+      };
+      reader.readAsArrayBuffer(oFile);
+    };
+    // };
+  </script>
+</body>
+
+</html>
