@@ -71,12 +71,14 @@
       console.log(file);
       if (!file) return;
       var oFile = file.target.files[0];
-      var sFilename = oFile.name;
+      var sFilename
       var type = 'xlsx';
       if (oFile.name.split('.xlsx').length > 1) {
         type = 'xlsx';
+        sFilename = oFile.name.split('.xlsx')[0];
       } else if (oFile.name.split('.xls').length > 1) {
         type = 'xls';
+        sFilename = oFile.name.split('.xls')[0];
       }
       console.log(type);
 
@@ -144,8 +146,8 @@
             // console.log(result[i]);
             if (result[i]) {
               // console.log(sliceCount, i);
-              fileObject[oFile.name + '__' + count] = result.slice(sliceCount, i);
-              fileObject[oFile.name + '__' + count].unshift(header);
+              fileObject[sFilename + '__' + count + '.csv'] = result.slice(sliceCount, i);
+              fileObject[sFilename + '__' + count + '.csv'].unshift(header);
               count++;
               sliceCount = i;
             } else {
@@ -160,8 +162,8 @@
           let lastBreakValue = breakValue - 450;
           // console.log(lastBreakValue);
           if (result.length > lastBreakValue) {
-            fileObject[oFile.name + '__' + count] = result.slice(lastBreakValue, result.length);
-            fileObject[oFile.name + '__' + count].unshift(header);
+            fileObject[sFilename + '__' + count + '.csv'] = result.slice(lastBreakValue, result.length);
+            fileObject[sFilename + '__' + count + '.csv'].unshift(header);
           }
           for (let i in fileObject) {
             // console.log('SS', fileObject[i].length);
@@ -189,7 +191,7 @@
           var encodedUri = encodeURI(csvContent);
           var link = document.createElement("a");
           link.setAttribute("href", encodedUri);
-          link.setAttribute("download", oFile.name + '__1');
+          link.setAttribute("download", sFilename + '__1.csv');
           document.body.appendChild(link);
           link.click();
         }
