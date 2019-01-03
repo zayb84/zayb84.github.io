@@ -57,7 +57,7 @@
     <h3> Break your file in chucks having 450 rows each.</h3>
   </div>
   <div class="content-center">
-    <img src="img/cloud-computing.png" width="70px" />
+    <!-- <img src="img/cloud-computing.png" width="70px" /> -->
     <h2> Upload your file </h2>
     <input onchange="parseExcel(event)" type="file" id="my_file_input" />
   </div>
@@ -87,7 +87,7 @@
       var fileObject = {};
       var header = [];
       reader.onload = function (e) {
-        console.log(e);
+        // console.log(e);
         if (type === 'xlsx') {
           var data = e.target.result;
           data = new Uint8Array(data);
@@ -103,20 +103,20 @@
         } else if (type === 'xls') {
           var data = e.target.result;
           var cfb = XLSX.read(data, { type: 'binary' });
-          console.log(cfb)
+          // console.log(cfb)
           cfb.SheetNames.forEach(function (sheetName, index) {
             if (index === 0) {
               // var roa = XLS.utils.sheet_to_json(workbook.Sheets[sheetName], { header: 1 });
               var oJS = XLS.utils.sheet_to_json(cfb.Sheets[sheetName]);
-              console.log(oJS)
+              // console.log(oJS)
               // console.log(roa);
               for (let i in oJS[0]) {
                 header.push(i);
               }
-              console.log(header);
+              // console.log(header);
               for (let i = 1; i < oJS.length; i++) {
                 var array = [];
-                for(let key in oJS[i]) {
+                for (let key in oJS[i]) {
                   array.push(oJS[i][key]);
                   // console.log(array);
                 }
@@ -154,7 +154,8 @@
               breakValue = i;
               break;
             }
-            // console.log(i);
+            // console.log(i, count);
+            // console.log('AFTER MULTIPLY');
             i = i + 450;
             // console.log(i);
           }
@@ -165,19 +166,26 @@
             fileObject[sFilename + '__' + count + '.csv'] = result.slice(lastBreakValue, result.length);
             fileObject[sFilename + '__' + count + '.csv'].unshift(header);
           }
+          // Object.entries(fileObject).forEach(([key, value], index) => {
+          //   console.log(`${index}: ${key}`);
+          // });
+          let counter = 0;
           for (let i in fileObject) {
-            // console.log('SS', fileObject[i].length);
+            // console.log(i);
             let csvContent = "data:text/csv;charset=utf-8,";
             fileObject[i].forEach(function (rowArray) {
               let row = rowArray.join(",");
               csvContent += row + "\r\n";
             });
-            var encodedUri = encodeURI(csvContent);
-            var link = document.createElement("a");
-            link.setAttribute("href", encodedUri);
-            link.setAttribute("download", i);
-            document.body.appendChild(link);
-            link.click();
+            setTimeout(() => {
+              var encodedUri = encodeURI(csvContent);
+              var link = document.createElement("a");
+              link.setAttribute("href", encodedUri);
+              link.setAttribute("download", i);
+              document.body.appendChild(link);
+              link.click();
+            }, 100 * counter);
+            counter++;
           }
           // console.log(fileObject, breakValue, count);
         } else {
